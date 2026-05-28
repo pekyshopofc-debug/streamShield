@@ -46,7 +46,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modul
 
 COPY --chmod=755 docker-entrypoint.sh ./
 
-USER nextjs
+# Run as root so the entrypoint can write to the /data volume
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"

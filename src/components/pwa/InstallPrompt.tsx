@@ -131,7 +131,7 @@ export default function InstallPrompt() {
           <li className="flex items-start gap-3">
             <span className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center mt-0.5">2</span>
             <div className="flex-1">
-              <p className="text-sm text-text">Role e toque em <strong>"Adicionar à Tela de Início"</strong></p>
+              <p className="text-sm text-text">Role e toque em <strong>&ldquo;Adicionar à Tela de Início&rdquo;</strong></p>
               <div className="mt-1.5 flex items-center gap-1.5 px-3 py-1.5 bg-bg-border rounded-lg w-fit">
                 <PlusSquare className="h-4 w-4 text-text-muted" />
                 <span className="text-xs text-text-muted">Adicionar à Tela de Início</span>
@@ -140,7 +140,7 @@ export default function InstallPrompt() {
           </li>
           <li className="flex items-start gap-3">
             <span className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center mt-0.5">3</span>
-            <p className="text-sm text-text mt-0.5">Confirme tocando em <strong>"Adicionar"</strong></p>
+            <p className="text-sm text-text mt-0.5">Confirme tocando em <strong>&ldquo;Adicionar&rdquo;</strong></p>
           </li>
         </ol>
 

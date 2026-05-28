@@ -24,8 +24,8 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV YTDLP_PATH=/usr/local/bin/yt-dlp
 
-# Install yt-dlp + python3 (runtime dep for yt-dlp) as root
-RUN apk add --no-cache python3 curl ca-certificates && \
+# Install runtime deps: yt-dlp + openssl (required by Prisma)
+RUN apk add --no-cache python3 curl ca-certificates openssl && \
     curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
          -o /usr/local/bin/yt-dlp && \
     chmod +x /usr/local/bin/yt-dlp
@@ -38,11 +38,11 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Prisma — client engine + CLI (needed for db push in entrypoint)
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+# Prisma — client engine + CLI, all owned by nextjs so db push can write
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 COPY --chmod=755 docker-entrypoint.sh ./
 

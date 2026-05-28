@@ -1,0 +1,33 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd /root/streamshield
+            git pull
+            docker build -t streamshield:latest .
+            docker rm -f streamshield
+            docker run -d \
+              --name streamshield \
+              --restart unless-stopped \
+              -v streamshield_data:/data \
+              -e NODE_ENV=production \
+              -e DATABASE_URL=file:/data/streamshield.db \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e JWT_EXPIRES_IN=7d \
+              -e NEXT_PUBLIC_APP_URL=https://streamshield.atozsolutions.xyz \
+              -e YTDLP_PATH=/usr/local/bin/yt-dlp \
+              streamshield:latest
+            echo "Deploy concluído"

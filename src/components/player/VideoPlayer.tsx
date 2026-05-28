@@ -277,7 +277,7 @@ async function initMediaSource(
   // Append one chunk; properly cleans up listeners regardless of outcome
   const appendOne = async (sb: SourceBuffer, url: string, offset: number, size: number): Promise<number> => {
     if (sb.updating) {
-      await new Promise<void>((r) => sb.addEventListener('updateend', r, { once: true }));
+      await new Promise<void>((r) => sb.addEventListener('updateend', () => r(), { once: true }));
     }
     const data = await fetchRange(url, offset, offset + size - 1);
     if (data.byteLength === 0) return offset;

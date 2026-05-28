@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Shield, User, LogOut, Settings, History, Heart, ShieldCheck, X } from 'lucide-react';
+import { Search, Shield, User, LogOut, Settings, History, Heart, ShieldCheck, X, Menu } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ export default function Header() {
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user } = useAuthStore();
@@ -43,6 +44,16 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-40 h-14 bg-bg/95 backdrop-blur-md border-b border-bg-border">
       <div className="h-full flex items-center gap-3 px-3 md:px-4">
+
+        {/* Mobile hamburger */}
+        {user && (
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="md:hidden p-2 text-text-subtle hover:text-text transition-colors flex-shrink-0"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
@@ -154,6 +165,71 @@ export default function Header() {
           )}
         </div>
       </div>
+
+      {/* Mobile drawer */}
+      {drawerOpen && (
+        <>
+          <div className="md:hidden fixed inset-0 bg-black/60 z-50" onClick={() => setDrawerOpen(false)} />
+          <div className="md:hidden fixed left-0 top-0 bottom-0 w-72 bg-bg-surface border-r border-bg-border z-50 flex flex-col animate-slide-in-right">
+            <div className="flex items-center justify-between px-4 h-14 border-b border-bg-border">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
+                  <Shield className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span className="font-bold text-text">Stream<span className="text-primary">Shield</span></span>
+              </div>
+              <button onClick={() => setDrawerOpen(false)} className="p-2 text-text-subtle">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {user && (
+              <div className="px-4 py-3 border-b border-bg-border">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold">
+                    {user.username[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-medium text-text text-sm">{user.username}</p>
+                    <p className="text-xs text-text-subtle truncate">{user.email}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <nav className="flex-1 overflow-y-auto py-2">
+              {[
+                { href: '/',            icon: <Shield className="h-5 w-5" />,      label: 'Início'      },
+                { href: '/search',      icon: <Search className="h-5 w-5" />,      label: 'Buscar'      },
+                { href: '/history',     icon: <History className="h-5 w-5" />,     label: 'Histórico'   },
+                { href: '/favorites',   icon: <Heart className="h-5 w-5" />,       label: 'Favoritos'   },
+                { href: '/playlists',   icon: <Settings className="h-5 w-5" />,    label: 'Playlists'   },
+                ...(user?.role === 'admin' ? [{ href: '/admin', icon: <ShieldCheck className="h-5 w-5 text-primary" />, label: 'Painel Admin' }] : []),
+              ].map(({ href, icon, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setDrawerOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-text hover:bg-bg-elevated transition-colors"
+                >
+                  {icon}
+                  <span className="text-sm font-medium">{label}</span>
+                </Link>
+              ))}
+            </nav>
+
+            <div className="border-t border-bg-border p-3">
+              <button
+                onClick={() => { setDrawerOpen(false); logout(); }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors text-sm font-medium"
+              >
+                <LogOut className="h-5 w-5" />
+                Sair da conta
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </header>
   );
 }

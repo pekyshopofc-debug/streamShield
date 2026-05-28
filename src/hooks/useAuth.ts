@@ -34,7 +34,8 @@ export function useAuth() {
         setUser(data.user);
         setToken(data.token);
         addToast(`Bem-vindo, ${data.user.username}!`, 'success');
-        router.push('/');
+        // Full reload ensures middleware picks up the new cookie on all environments
+        window.location.href = '/';
       } catch (err: any) {
         throw err;
       } finally {
@@ -70,7 +71,7 @@ export function useAuth() {
         setUser(data.user);
         setToken(data.token);
         addToast('Conta criada com sucesso!', 'success');
-        router.push('/');
+        window.location.href = '/';
       } catch (err: any) {
         addToast(err.message, 'error');
         throw err;

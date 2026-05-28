@@ -30,6 +30,7 @@ async function getStreamViaYtdlp(videoId: string, quality: 'best' | '720' | '480
     '--no-playlist',
     '--no-warnings',
     '-f', formatSelector,
+    // Use Android VR client — bypasses bot detection on server IPs
     '--get-url',
     '--get-format',
     url,

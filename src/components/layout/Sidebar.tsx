@@ -30,7 +30,7 @@ export default function Sidebar() {
   return (
     <motion.aside
       className={cn(
-        'hidden md:flex flex-col fixed left-0 top-16 bottom-0 z-30',
+        'hidden md:flex flex-col fixed left-0 top-14 bottom-0 z-30',
         'bg-bg border-r border-bg-border transition-none',
       )}
       animate={{ width: sidebarCollapsed ? 64 : 220 }}

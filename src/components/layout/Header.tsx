@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Shield, User, LogOut, Settings, History, Heart, ShieldCheck } from 'lucide-react';
+import { Search, Shield, User, LogOut, Settings, History, Heart, ShieldCheck, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 export default function Header() {
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user } = useAuthStore();
   const { logout } = useAuth();
@@ -20,6 +22,7 @@ export default function Header() {
     e.preventDefault();
     if (query.trim()) {
       router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+      setSearchOpen(false);
     }
   };
 
@@ -33,44 +36,77 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-bg/95 backdrop-blur-md border-b border-bg-border">
-      <div className="h-full flex items-center gap-4 px-4">
+    <header className="fixed top-0 left-0 right-0 z-40 h-14 bg-bg/95 backdrop-blur-md border-b border-bg-border">
+      <div className="h-full flex items-center gap-3 px-3 md:px-4">
+
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
-          <div className="h-8 w-8 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 group-hover:border-primary/40 transition-colors">
+          <div className="h-8 w-8 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
             <Shield className="h-4 w-4 text-primary" />
           </div>
-          <span className="font-bold text-text text-lg hidden sm:block">
+          <span className="font-bold text-text text-base hidden sm:block">
             Stream<span className="text-primary">Shield</span>
           </span>
         </Link>
 
-        {/* Search bar */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-auto">
-          <div className="relative flex items-center">
+        {/* Desktop search — always visible */}
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-auto">
+          <div className="relative flex items-center w-full">
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar vídeos..."
-              className={cn(
-                'w-full h-10 pl-4 pr-12 rounded-full',
-                'bg-bg-elevated border border-bg-border text-text placeholder:text-text-subtle',
-                'focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40',
-                'transition-all duration-200',
-              )}
+              className="w-full h-10 pl-4 pr-12 rounded-full bg-bg-elevated border border-bg-border text-text placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
             />
-            <button
-              type="submit"
-              className="absolute right-1 h-8 w-8 flex items-center justify-center rounded-full bg-bg-border hover:bg-primary/20 text-text-muted hover:text-primary transition-all"
-            >
+            <button type="submit" className="absolute right-1 h-8 w-8 flex items-center justify-center rounded-full bg-bg-border hover:bg-primary/20 text-text-muted hover:text-primary transition-all">
               <Search className="h-4 w-4" />
             </button>
           </div>
         </form>
 
-        {/* Auth section */}
+        {/* Mobile: spacer + search icon */}
+        <div className="flex-1 md:hidden" />
+
+        {/* Mobile search overlay */}
+        {searchOpen && (
+          <div className="md:hidden absolute inset-0 flex items-center gap-2 px-3 bg-bg z-10">
+            <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-subtle" />
+                <input
+                  ref={searchRef}
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Buscar vídeos..."
+                  className="w-full h-10 pl-9 pr-4 rounded-full bg-bg-elevated border border-bg-border text-text placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-primary/40 text-base"
+                />
+              </div>
+              <button type="submit" className="h-10 px-4 rounded-full bg-primary text-white text-sm font-medium">
+                OK
+              </button>
+            </form>
+            <button onClick={() => setSearchOpen(false)} className="p-2 text-text-subtle">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+
+        {/* Mobile search toggle */}
+        <button
+          onClick={() => setSearchOpen(true)}
+          className="md:hidden p-2 text-text-subtle hover:text-text transition-colors"
+        >
+          <Search className="h-5 w-5" />
+        </button>
+
+        {/* Auth */}
         <div className="flex-shrink-0 relative" ref={menuRef}>
           {user ? (
             <>
@@ -88,11 +124,11 @@ export default function Header() {
                     <p className="text-xs text-text-subtle truncate">{user.email}</p>
                   </div>
                   <div className="py-1">
-                    <MenuLink href="/history" icon={<History className="h-4 w-4" />} label="Histórico" onClick={() => setMenuOpen(false)} />
-                    <MenuLink href="/favorites" icon={<Heart className="h-4 w-4" />} label="Favoritos" onClick={() => setMenuOpen(false)} />
-                    <MenuLink href="/playlists" icon={<Settings className="h-4 w-4" />} label="Playlists" onClick={() => setMenuOpen(false)} />
+                    <MenuLink href="/history"   icon={<History className="h-4 w-4" />}   label="Histórico"   onClick={() => setMenuOpen(false)} />
+                    <MenuLink href="/favorites" icon={<Heart className="h-4 w-4" />}     label="Favoritos"   onClick={() => setMenuOpen(false)} />
+                    <MenuLink href="/playlists" icon={<Settings className="h-4 w-4" />}  label="Playlists"   onClick={() => setMenuOpen(false)} />
                     {user?.role === 'admin' && (
-                      <MenuLink href="/admin" icon={<ShieldCheck className="h-4 w-4 text-primary" />} label="Painel Admin" onClick={() => setMenuOpen(false)} />
+                      <MenuLink href="/admin"   icon={<ShieldCheck className="h-4 w-4 text-primary" />} label="Painel Admin" onClick={() => setMenuOpen(false)} />
                     )}
                   </div>
                   <div className="border-t border-bg-border py-1">
@@ -110,7 +146,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors"
             >
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Entrar</span>
@@ -124,11 +160,7 @@ export default function Header() {
 
 function MenuLink({ href, icon, label, onClick }: { href: string; icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-bg-elevated transition-colors"
-    >
+    <Link href={href} onClick={onClick} className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-bg-elevated transition-colors">
       {icon}
       {label}
     </Link>

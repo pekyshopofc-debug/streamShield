@@ -8,6 +8,7 @@ import MiniPlayer from '@/components/player/MiniPlayer';
 import { ToastContainer } from '@/components/ui/Toast';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import ServiceWorkerRegistration from '@/components/pwa/ServiceWorkerRegistration';
+import BottomNav from '@/components/layout/BottomNav';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -47,10 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans bg-bg text-text min-h-screen`}>
         <Header />
-        <div className="flex pt-16">
+        <div className="flex pt-14">
           <Sidebar />
           <MainLayout>{children}</MainLayout>
         </div>
+        <BottomNav />
         <MiniPlayer />
         <ToastContainer />
         <InstallPrompt />
